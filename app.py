@@ -9,6 +9,27 @@ pygame.init()
 screen = pygame.display.set_mode((800, 600))
 pygame.display.set_caption("Game Menu")
 
+
+class GameSprite(pygame.sprite.Sprite):
+    def __init__(self, player_image, player_x, player_y, size_x, size_y, player_speed):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.transform.scale(pygame.image.load(player_image), (size_x, size_y))
+        self.speed = player_speed
+        self.rect = self.image.get_rect()
+        self.rect.x = player_x
+        self.rect.y = player_y
+
+    def reset(self):
+        screen.blit(self.image, (self.rect.x, self.rect.y))
+
+
+class Player(GameSprite):
+
+    # метод для керування спрайтом стрілками клавіатури
+    def update(self):
+        pass
+
+
 # Цвета
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -62,18 +83,19 @@ def flappy_game():
     bird_x = 100
     bird_y = 300
     bird_velocity = 0
-    gravity = 0.5
+    gravity = 0.6
     jump_strength = -10
 
     pipes = []
+    pipes_rect = []
     pipe_width = 70
     pipe_height = random.randint(100, 400)
     pipe_gap = 150
     pipe_velocity = 5
 
     clock = pygame.time.Clock()
-
-    while True:
+    game = True
+    while game:
         screen.fill(BLACK)
         screen.blit(background, (0, 0))  # Отображаем фон
         screen.blit(flappy_bird_img, (bird_x, bird_y))  # Отображаем птицу
@@ -88,8 +110,17 @@ def flappy_game():
 
         # Рисуем трубы
         for x, y in pipes:
-            pygame.draw.rect(screen, (0, 255, 0), pygame.Rect(x, 0, pipe_width, y))
-            pygame.draw.rect(screen, (0, 255, 0), pygame.Rect(x, y + pipe_gap, pipe_width, 600 - y - pipe_gap))
+            r_up = pygame.draw.rect(screen, (0, 255, 0), pygame.Rect(x, 0, pipe_width, y))
+            r_down = pygame.draw.rect(screen, (0, 255, 0), pygame.Rect(x, y + pipe_gap, pipe_width, 600 - y - pipe_gap))
+            pipes_rect.append(r_up)
+            pipes_rect.append(r_down)
+        player_rect = pygame.Rect(bird_x, bird_y, 50, 50)
+        for p in pipes_rect:
+            if p.colliderect(player_rect):
+                game = False
+                break
+        if not game:
+            break
 
         # Двигаем птицу
         bird_velocity += gravity
@@ -124,10 +155,13 @@ def maze_game():
     player_speed = 5
 
     maze_walls = [
-        pygame.Rect(200, 150, 400, 20),
-        pygame.Rect(200, 150, 20, 400),
-        pygame.Rect(200, 550, 400, 20),
-        pygame.Rect(600, 150, 20, 400),
+        pygame.Rect(70, 150, 400, 20),
+        pygame.Rect(250, 300, 400, 20),
+        pygame.Rect(630,100, 20, 200),
+        pygame.Rect(70, 150, 20, 200),
+        pygame.Rect(70, 320, 20, 200),
+        pygame.Rect(70, 500, 400, 20),
+        pygame.Rect(300, 500, 400, 20),
     ]
 
     # Финиш
